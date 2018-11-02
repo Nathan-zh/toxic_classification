@@ -36,7 +36,7 @@ class Embedding():
                     j -= 1
                 else:
                     continue
-            output.append(word_T)
+            output.append(word_T.T)
 
         return output
 

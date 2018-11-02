@@ -1,10 +1,11 @@
 #from __future__ import print_function
-#import tensorflow as tf
+import tensorflow as tf
 import numpy as np
 #import tqdm
 from utils import dataset_input, data_prepro, batch_generator
-#import tf.nn.rnn_cell.LSTMCell as LSTMCell
-#import tf.nn.bidirectional_dynamic_rnn as BiRNN
+from tensorflow.nn.rnn_cell import LSTMCell
+from tensorflow.nn import bidirectional_dynamic_rnn as BiRNN
+from tensorflow.contrib.rnn import MultiRNNCell
 from Embedding import Embedding
 
 
@@ -33,8 +34,8 @@ y_train, y_val = y_train_all[:split_index], y_train_all[split_index:]
 tf.reset_default_graph()
 ##Input
 with tf.name_scope('Input'):
-    batch_ph = tf.placeholder(tf.float32, [embed_size, seq_maxlen], name='batch_placeholder')
-    output_ph = tf.placeholder(tf.int32,[None, y_train.shape[1]], name='output_placeholder')
+    batch_ph = tf.placeholder(tf.float32, [None, seq_maxlen, embed_size], name='batch_placeholder')
+    output_ph = tf.placeholder(tf.float32, [None, 1], name='output_placeholder')
     keep_prob_ph = tf.placeholder(tf.float32, name='keep_prob_placeholder')
 
 '''
@@ -51,22 +52,25 @@ with tf.name_scope('Embedding Layer'):
 lstm_size = 128
 lstm_layers = 2
 
-with tf.name_scope('Multi Bi-LSTM Layers'):
-    output = batch_ph
-    for n in range(lstm_layers):
-        cell_fw = LSTMCell(lstm_size)
-        cell_bw = LSTMCell(lstm_size)
-        (output_fw, output_bw), final_state = BiRNN(cell_fw, cell_bw, output)
-        output = tf.divide(tf.add(output_fw, output_bw), 2)
+with tf.name_scope('Multi_BiLSTM_Layers'):
+
+    lstm_fw = LSTMCell(lstm_size)
+    lstm_bw = LSTMCell(lstm_size)
+
+    #cell_fw = MultiRNNCell([lstm_fw] * lstm_layers)
+    #cell_bw = MultiRNNCell([lstm_bw] * lstm_layers)
+
+    (output_fw, output_bw), final_state = BiRNN(lstm_fw, lstm_bw, batch_ph, dtype=tf.float32)
+    output = tf.divide(tf.add(output_fw, output_bw), 2)
 
     tf.summary.histogram('RNN_output', output)
 
 ##Dropout
-    drop = tf.nn.dropout(output,keep_prob_ph)
+    drop = tf.nn.dropout(output, keep_prob_ph)
 
 ##FC layers
-with tf.name_scope('Fully connected Layers'):
-    prediction = tf.contrib.layers.fully_connected(drop, 6, activation_fn=tf.nn.sigmoid)
+with tf.name_scope('Fully_connected_Layers'):
+    prediction = tf.contrib.layers.fully_connected(drop[:, -1], 1, activation_fn=tf.nn.sigmoid)
     tf.summary.histogram('Prediction', prediction)
 
 with tf.name_scope('Loss'):
@@ -74,7 +78,7 @@ with tf.name_scope('Loss'):
     tf.summary.scalar('loss', loss)
 
 optimizer = tf.train.AdamOptimizer(learning_rate=1e-3).minimize(loss)
-correct_pred = tf.equal(tf.cast(tf.round(prediction), tf.int32), output_ph)
+correct_pred = tf.equal(tf.cast(tf.round(prediction), tf.int32), tf.cast(output_ph, tf.int32))
 accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 tf.summary.scalar('accuracy', accuracy)
 
@@ -86,17 +90,17 @@ saver = tf.train.Saver()
 
 
 #Training and Evaluation
-epoch = 100
+epoch = 1
 keep_prop = 0.8
 batch_size = 128
-iteration = np.int32(np.round(x_train.shape[0] / batch_size))
+iteration = 1  #np.int32(np.round(len(x_train) / batch_size))
 
-with tf.Session as sess:
+with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
     print('start training...')
     for m in range(epoch):
         print('Epoch: {} start!'.format(m + 1))
-        for n in tqdm(range(iteration)):
+        for n in range(iteration):
             (x_batch, y_batch) = batch_generator(x_train, y_train, batch_size)
             loss_train,  _, summary = sess.run([loss, optimizer, merged],
                                               feed_dict={batch_ph: x_batch,
@@ -126,13 +130,14 @@ with tf.Session as sess:
 train_writer.close()
 val_writer.close()
 
+'''
 #Testing
 
-with tf.Session as sess:
+with tf.Session() as sess:
     saver.restore(sess, './model/final.ckpt')
     test_acc = sess.run(accuracy,
                        feed_dict={batch_ph: x_test,
                        output_ph: y_test,
                        keep_prob_ph: 1})
     print('Test Accuracy: {:.3f}'.format(test_acc))
-
+'''
