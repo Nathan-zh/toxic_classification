@@ -21,8 +21,8 @@ embed_size = 300
 split_frac = 0.9
 
 Embed = Embedding()
-x_train_all = Embed.wordToVec(x_train_list)
-x_test = Embed.wordToVec(x_test_list)
+x_train_all = Embed.wordsToVec(x_train_list)
+x_test = Embed.wordsToVec(x_test_list)
 
 split_index = int(split_frac * len(x_train_all))
 x_train, x_val = x_train_all[:split_index], x_train_all[split_index:] 
