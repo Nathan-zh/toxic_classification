@@ -23,17 +23,21 @@ class Embedding():
 
     # The input is a string with " " to split up.
     def wordsToVec(self, word):
-        word_list = word.split(" ") # change word string to list
-        lenW = len(word_list)
-        word_T = [[0] * 300] * 5000 # An empty list for vectors
-        for i in range(lenW-1,-1 ,-1):
-            if word_list[i] in self.embeddings_index:
-                word_T[4999 - i] = self.embeddings_index[word_list[i]]
-            else:
-                continue
+        output = []
 
+        for m in word:
+            word_list = m.split(" ")  # change word string to list
+            lenW = len(word_list)
+            word_T = np.zeros([300, 5000])  # An empty list for vectors
+            for i in range(lenW, -1, -1):
+                if word_list[i] in self.embeddings_index:
+                    word_T[:, 4999 - i] = self.embeddings_index[word_list[i]]
+                else:
+                    continue
 
-        return word_T
+        output.append(word_T)
+
+        return output
 
 
 
