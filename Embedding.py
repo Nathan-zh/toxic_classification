@@ -36,7 +36,6 @@ class Embedding():
                     continue
             output.append(word_T)
 
-
         return output
 
 
