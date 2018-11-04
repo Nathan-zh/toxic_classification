@@ -90,10 +90,10 @@ saver = tf.train.Saver()
 
 
 #Training and Evaluation
-epoch = 1
+epoch = 50
 keep_prop = 0.8
-batch_size = 128
-iteration = 1  #np.int32(np.round(len(x_train) / batch_size))
+batch_size = 32
+iteration = np.int32(np.round(len(x_train) / batch_size))
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
