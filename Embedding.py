@@ -9,7 +9,11 @@ class Embedding():
          if (typeToLoad == "glove" or typeToLoad == "fasttext"):
              self.embeddings_index = dict()
              # Transfer the embedding weights into a dictionary by iterating through every line of the file.
+<<<<<<< HEAD
              f = open(EMBEDDING_FILE) #,encoding="utf-8")
+=======
+             f = open(EMBEDDING_FILE)
+>>>>>>> caeb3ecb01f2e7aa127a3ef8fff2b9b4cdc23371
              for line in f:
                  # split up line into an indexed array
                  values = line.split()
