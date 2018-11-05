@@ -103,3 +103,5 @@
 2018-11-04 00:23:00.621132: I tensorflow/stream_executor/cuda/cuda_diagnostics.cc:189] libcuda reported version is: 384.81.0
 2018-11-04 00:23:00.621228: I tensorflow/stream_executor/cuda/cuda_diagnostics.cc:193] kernel reported version is: 384.81.0
 2018-11-04 00:23:00.621239: I tensorflow/stream_executor/cuda/cuda_diagnostics.cc:300] kernel version seems to match DSO: 384.81.0
+slurmstepd: error: *** JOB 6012 ON compute024 CANCELLED AT 2018-11-05T01:31:53 DUE TO TIME LIMIT ***
+slurmstepd: error: *** JOB 6012 STEPD TERMINATED ON compute024 AT 2018-11-05T01:32:53 DUE TO JOB NOT ENDING WITH SIGNALS ***
