@@ -17,7 +17,7 @@ embed_size = 25
 Embed = Embedding()
 x_test = Embed.wordsToVec(x_test_list)
 
-
+saver = tf.train.Saver()
 batch_size = 128
 (x_batch, y_batch) = batch_generator(x_test, y_test, batch_size)
 
