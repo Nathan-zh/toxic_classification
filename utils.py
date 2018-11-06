@@ -1,4 +1,4 @@
-from __future__ import print_function
+#from __future__ import print_function
 import numpy as np
 import pandas as pd
 
@@ -47,6 +47,12 @@ def batch_generator(x_input, y_input, batch_size):
     count = y_input.shape[0]
     idx = np.arange(count)
     np.random.shuffle(idx)
-    x_batch, y_batch = [x_input[i] for i in idx[:batch_size]], y_input[idx[:batch_size]]
+    num = np.int(count / batch_size)
+
+    x_batch, y_batch = [], []
+
+    for i in range(num):
+        x_batch.append([x_input[i] for i in idx[i*batch_size:(i+1)*batch_size]])
+        y_batch.append(y_input[i*batch_size:(i+1)*batch_size])
 
     return (x_batch, y_batch)
