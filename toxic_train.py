@@ -10,7 +10,7 @@ from Embedding import Embedding
 
 
 #Data preprocess
-seq_maxlen = 5000
+seq_maxlen = 100
 
 (train_data, y_train_all, test_data, y_test) = dataset_input()
 x_train_list = data_prepro(train_data)
@@ -18,7 +18,7 @@ x_test_list = data_prepro(test_data)
 
 
 #Embedding: each squence is a 300*5000 matrix
-embed_size = 300
+embed_size = 25
 split_frac = 0.9
 
 Embed = Embedding()
@@ -40,7 +40,7 @@ with tf.name_scope('Input'):
 
 '''
 ##Embedding
-embed_size = 300
+embed_size = 25
 
 with tf.name_scope('Embedding Layer'):
     embedding = tf.Variable(tf.random_uniform([vocabulary_size, embed_size], -1, 1))
@@ -49,7 +49,7 @@ with tf.name_scope('Embedding Layer'):
 '''
 
 ##RNN layers
-lstm_size = 128
+lstm_size = 50
 lstm_layers = 2
 
 with tf.name_scope('Multi_BiLSTM_Layers'):
@@ -90,10 +90,11 @@ saver = tf.train.Saver()
 
 
 #Training and Evaluation
-epoch = 50
-keep_prop = 0.8
+epoch = 1
+keep_prop = 0.5
 batch_size = 32
-iteration = np.int32(np.round(len(x_train) / batch_size))
+iteration = 4500
+itr_val = 500
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
@@ -110,7 +111,7 @@ with tf.Session() as sess:
             #Each 100 iterations, run a valadition
             if (n + 1) % 100 == 0:
                 val_acc = 0
-                for k in range(100):
+                for k in range(itr_val):
                     (x_batch, y_batch) = batch_generator(x_val, y_val, batch_size)
                     accuracy_val, summary = sess.run([accuracy, merged],
                                                     feed_dict={batch_ph: x_batch,
@@ -119,10 +120,10 @@ with tf.Session() as sess:
                     val_acc += accuracy_val
                 print('Iteration: {}'.format(n+1),
                       'Train loss: {:.3f}'.format(loss_train),
-                      'Val accuracy: {:.3f}'.format(val_acc/100))
+                      'Val accuracy: {:.3f}'.format(val_acc/itr_val))
                 val_writer.add_summary(summary, n+m*iteration)
 
-        print('Epoch: {} finished!'.format(m+1), 'Train loss: {}'.format(loss_train))
+        print('Epoch: {} finished!'.format(m+1), 'Train loss: {:.3f}'.format(loss_train))
         saver.save(sess, './model')
     print('**********************TRAINING FINISHED!**********************')
     saver.save(sess, './model/final.ckpt')
