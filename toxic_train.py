@@ -93,10 +93,9 @@ saver = tf.train.Saver()
 epoch = 1
 keep_prop = 0.5
 batch_size = 32
-iteration = np.int(y_train[0] / batch_size)
+iteration = np.int(y_train.shape[0] / batch_size)
 itr_val = np.int(y_val.shape[0] / batch_size)
-(x_batch_train, y_batch_train) = batch_generator(x_train, y_train, batch_size)
-(x_batch_val, y_batch_val) = batch_generator(x_val, y_val, batch_size)
+gen_batch_train = batch_generator(x_train, y_train, batch_size)
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
@@ -104,7 +103,7 @@ with tf.Session() as sess:
     for m in range(epoch):
         print('Epoch: {} start!'.format(m + 1))
         for n in range(iteration):
-            x_batch, y_batch = next(x_batch_train), next(y_batch_train)
+            (x_batch, y_batch) = next(gen_batch_train)
             loss_train,  _, summary = sess.run([loss, optimizer, merged],
                                               feed_dict={batch_ph: x_batch,
                                               output_ph: y_batch,
@@ -113,8 +112,9 @@ with tf.Session() as sess:
             #Each 100 iterations, run a valadition
             if (n + 1) % 100 == 0:
                 val_acc = 0
+                gen_batch_val = batch_generator(x_val, y_val, batch_size)
                 for k in range(itr_val):
-                    x_batch, y_batch = next(x_batch_val), next(y_batch_val)
+                    (x_batch, y_batch) = next(gen_batch_val)
                     accuracy_val, summary = sess.run([accuracy, merged],
                                                     feed_dict={batch_ph: x_batch,
                                                     output_ph: y_batch,
@@ -126,7 +126,7 @@ with tf.Session() as sess:
                 val_writer.add_summary(summary, n+m*iteration)
 
         print('Epoch: {} finished!'.format(m+1), 'Train loss: {:.3f}'.format(loss_train))
-        saver.save(sess, './model')
+        saver.save(sess, './model/intermediate.ckpt')
     print('**********************TRAINING FINISHED!**********************')
     saver.save(sess, './model/final.ckpt')
 

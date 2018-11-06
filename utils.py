@@ -49,10 +49,7 @@ def batch_generator(x_input, y_input, batch_size):
     np.random.shuffle(idx)
     num = np.int(count / batch_size)
 
-    x_batch, y_batch = [], []
-
     for i in range(num):
-        x_batch.append([x_input[i] for i in idx[i*batch_size:(i+1)*batch_size]])
-        y_batch.append(y_input[i*batch_size:(i+1)*batch_size])
-
-    return (x_batch, y_batch)
+        x_batch = [x_input[i] for i in idx[i*batch_size:(i+1)*batch_size]]
+        y_batch = y_input[i*batch_size:(i+1)*batch_size]
+        yield (x_batch, y_batch)
