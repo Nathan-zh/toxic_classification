@@ -133,14 +133,22 @@ with tf.Session() as sess:
 train_writer.close()
 val_writer.close()
 
-'''
-##Testing
+
+#Testing
 
 with tf.Session() as sess:
     saver.restore(sess, './model/final.ckpt')
-    test_acc = sess.run(accuracy,
-                       feed_dict={batch_ph: x_test,
-                       output_ph: y_test,
-                       keep_prob_ph: 1})
-    print('Test Accuracy: {:.3f}'.format(test_acc))
-'''
+    iteration = np.int(y_train.shape[0] / batch_size)
+    gen_batch_test = batch_generator(x_test, y_test, batch_size)
+    test_acc = 0
+
+    for i in range(iteration):
+        (x_batch, y_batch) = next(gen_batch_test)
+        test_accuracy = sess.run(accuracy,
+                                feed_dict={batch_ph: x_batch,
+                                output_ph: y_batch,
+                                keep_prob_ph: 1})
+        test_acc+= test_accuracy
+
+    print('Test Accuracy: {:.3f}'.format(test_acc/iteration))
+
