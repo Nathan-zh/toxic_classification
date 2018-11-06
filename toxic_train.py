@@ -143,7 +143,7 @@ batch_s = 64
 
 with tf.Session() as sess:
     saver.restore(sess, './model/final.ckpt')
-    iteration = np.int(y_train.shape[0] / batch_s)
+    iteration = np.int(y_test.shape[0] / batch_s)
     gen_batch_test = batch_generator(x_test, y_test, batch_s)
     test_acc = 0
 
