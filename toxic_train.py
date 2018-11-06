@@ -93,8 +93,8 @@ saver = tf.train.Saver()
 epoch = 1
 keep_prop = 0.5
 batch_size = 32
-iteration = np.int(x_train.shape[0] / batch_size)
-itr_val = np.int(x_val.shape[0] / batch_size)
+iteration = np.int(y_train[0] / batch_size)
+itr_val = np.int(y_val.shape[0] / batch_size)
 (x_batch_train, y_batch_train) = batch_generator(x_train, y_train, batch_size)
 (x_batch_val, y_batch_val) = batch_generator(x_val, y_val, batch_size)
 
