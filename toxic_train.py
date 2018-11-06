@@ -93,8 +93,10 @@ saver = tf.train.Saver()
 epoch = 1
 keep_prop = 0.5
 batch_size = 32
-iteration = 4500
-itr_val = 500
+iteration = np.int(x_train.shape[0] / batch_size)
+itr_val = np.int(x_val.shape[0] / batch_size)
+(x_batch_train, y_batch_train) = batch_generator(x_train, y_train, batch_size)
+(x_batch_val, y_batch_val) = batch_generator(x_val, y_val, batch_size)
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
@@ -102,7 +104,7 @@ with tf.Session() as sess:
     for m in range(epoch):
         print('Epoch: {} start!'.format(m + 1))
         for n in range(iteration):
-            (x_batch, y_batch) = batch_generator(x_train, y_train, batch_size)
+            x_batch, y_batch = next(x_batch_train), next(y_batch_train)
             loss_train,  _, summary = sess.run([loss, optimizer, merged],
                                               feed_dict={batch_ph: x_batch,
                                               output_ph: y_batch,
@@ -112,7 +114,7 @@ with tf.Session() as sess:
             if (n + 1) % 100 == 0:
                 val_acc = 0
                 for k in range(itr_val):
-                    (x_batch, y_batch) = batch_generator(x_val, y_val, batch_size)
+                    x_batch, y_batch = next(x_batch_val), next(y_batch_val)
                     accuracy_val, summary = sess.run([accuracy, merged],
                                                     feed_dict={batch_ph: x_batch,
                                                     output_ph: y_batch,
