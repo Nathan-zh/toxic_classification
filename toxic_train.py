@@ -95,13 +95,17 @@ keep_prop = 0.5
 batch_size = 32
 iteration = np.int(y_train.shape[0] / batch_size)
 itr_val = np.int(y_val.shape[0] / batch_size)
-gen_batch_train = batch_generator(x_train, y_train, batch_size)
 
 with tf.Session() as sess:
+
     sess.run(tf.global_variables_initializer())
     print('start training...')
+
     for m in range(epoch):
+
         print('Epoch: {} start!'.format(m + 1))
+        gen_batch_train = batch_generator(x_train, y_train, batch_size)
+
         for n in range(iteration):
             (x_batch, y_batch) = next(gen_batch_train)
             loss_train,  _, summary = sess.run([loss, optimizer, merged],
