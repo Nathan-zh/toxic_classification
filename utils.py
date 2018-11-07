@@ -26,7 +26,7 @@ def dataset_input():
     test_data1 = df_x1.values.tolist()
     test_data =  [test_data1[i] for i in idx]
     
-    return (train_data[:100], train_label[:100], test_data[:100], test_label[:100])
+    return (train_data, train_label, test_data, test_label)
 
 
 def data_prepro(x_input):

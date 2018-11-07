@@ -35,7 +35,7 @@ tf.reset_default_graph()
 ##Input
 with tf.name_scope('Input'):
     batch_ph = tf.placeholder(tf.float32, [None, seq_maxlen, embed_size], name='batch_placeholder')
-    output_ph = tf.placeholder(tf.float32, [None, 1], name='output_placeholder')
+    output_ph = tf.placeholder(tf.float32, [None, 6], name='output_placeholder')
     keep_prob_ph = tf.placeholder(tf.float32, name='keep_prob_placeholder')
 
 '''
@@ -49,33 +49,39 @@ with tf.name_scope('Embedding Layer'):
 '''
 
 ##RNN layers
-lstm_size = 50
+lstm_size = 25
 lstm_layers = 2
+keep_prob_rnn = 0.8
 
-with tf.name_scope('Multi_BiLSTM_Layers'):
+output = batch_ph
+for i in range(lstm_layers):
+    with tf.name_scope('BiLSTM_Layer_{}'.format(i)):
+        lstm_fw = LSTMCell(lstm_size)
+        cell_fw = tf.contrib.rnn.DropoutWrapper(lstm_fw, input_keep_prob=keep_prob_rnn)
+        lstm_bw = LSTMCell(lstm_size)
+        cell_bw = tf.contrib.rnn.DropoutWrapper(lstm_bw, input_keep_prob=keep_prob_rnn)
 
-    lstm_fw = LSTMCell(lstm_size)
-    lstm_bw = LSTMCell(lstm_size)
+        (output_fw, output_bw), final_state = BiRNN(cell_fw, cell_bw, output, dtype=tf.float32)
+        output = tf.concat((output_fw, output_bw), 2)
 
-    (output_fw, output_bw), final_state = BiRNN(lstm_fw, lstm_bw, batch_ph, dtype=tf.float32)
-    output = tf.divide(tf.add(output_fw, output_bw), 2)
+tf.summary.histogram('RNN_output', output)
 
-    tf.summary.histogram('RNN_output', output)
-
-##Dropout
-    drop = tf.nn.dropout(output, keep_prob_ph)
+##Dropout + attention?
+drop = tf.nn.dropout(output[:, -1], keep_prob_ph)
 
 ##FC layers
 with tf.name_scope('Fully_connected_Layers'):
-    prediction = tf.contrib.layers.fully_connected(drop[:, -1], 6, activation_fn=tf.nn.sigmoid)
+    prediction = tf.contrib.layers.fully_connected(drop, 6, activation_fn=tf.nn.sigmoid)
     tf.summary.histogram('Prediction', prediction)
 
 with tf.name_scope('Loss'):
     loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=output_ph, logits=prediction))
     tf.summary.scalar('loss', loss)
 
-optimizer = tf.train.AdamOptimizer(learning_rate=1e-3).minimize(loss)
-correct_pred = tf.equal(tf.cast(tf.round(prediction), tf.int32), tf.cast(output_ph, tf.int32))
+optimizer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(loss)
+#( ,6) == ( ,6)
+correct_pred = tf.reduce_all(tf.equal(tf.cast(tf.round(prediction), tf.int32), tf.cast(output_ph, tf.int32)), axis=1)
+
 accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32))
 tf.summary.scalar('accuracy', accuracy)
 
@@ -87,11 +93,10 @@ saver = tf.train.Saver()
 
 
 #Training and Evaluation
-epoch = 1
+epoch = 10
 keep_prop = 0.5
-batch_size = 32
-iteration = np.int(y_train.shape[0] / batch_size)
-itr_val = np.int(y_val.shape[0] / batch_size)
+batch_size = 16
+batch_size_val = 64
 
 with tf.Session() as sess:
 
@@ -102,7 +107,7 @@ with tf.Session() as sess:
 
         print('Epoch: {} start!'.format(m + 1))
         gen_batch_train = batch_generator(x_train, y_train, batch_size)
-
+        iteration = 50 #np.int(y_train.shape[0] / batch_size)
         for n in range(iteration):
             (x_batch, y_batch) = next(gen_batch_train)
             loss_train,  _, summary = sess.run([loss, optimizer, merged],
@@ -111,9 +116,10 @@ with tf.Session() as sess:
                                               keep_prob_ph: keep_prop})
             train_writer.add_summary(summary, n+m*iteration)
             #Each 100 iterations, run a valadition
-            if (n + 1) % 100 == 0:
+            if (n + 1) % 10 == 0:
                 val_acc = 0
-                gen_batch_val = batch_generator(x_val, y_val, batch_size)
+                gen_batch_val = batch_generator(x_val, y_val, batch_size_val)
+                itr_val = np.int(y_val.shape[0] / batch_size_val)
                 for k in range(itr_val):
                     (x_batch, y_batch) = next(gen_batch_val)
                     accuracy_val, summary = sess.run([accuracy, merged],
@@ -122,8 +128,8 @@ with tf.Session() as sess:
                                                     keep_prob_ph: 1})
                     val_acc += accuracy_val
                 print('Iteration: {}'.format(n+1),
-                      'Train loss: {:.3f}'.format(loss_train),
-                      'Val accuracy: {:.3f}'.format(val_acc/itr_val))
+                      'Train loss: {:.5f}'.format(loss_train),
+                      'Val accuracy: {:.8f}'.format(val_acc/itr_val))
                 val_writer.add_summary(summary, n+m*iteration)
 
         print('Epoch: {} finished!'.format(m+1), 'Train loss: {:.3f}'.format(loss_train))
