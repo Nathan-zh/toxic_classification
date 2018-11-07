@@ -5,7 +5,7 @@ import numpy as np
 from utils import dataset_input, data_prepro, batch_generator
 from tensorflow.nn.rnn_cell import LSTMCell
 from tensorflow.nn import bidirectional_dynamic_rnn as BiRNN
-from tensorflow.contrib.rnn import MultiRNNCell
+#from tensorflow.contrib.rnn import MultiRNNCell
 from Embedding import Embedding
 
 
@@ -57,9 +57,6 @@ with tf.name_scope('Multi_BiLSTM_Layers'):
     lstm_fw = LSTMCell(lstm_size)
     lstm_bw = LSTMCell(lstm_size)
 
-    #cell_fw = MultiRNNCell([lstm_fw] * lstm_layers)
-    #cell_bw = MultiRNNCell([lstm_bw] * lstm_layers)
-
     (output_fw, output_bw), final_state = BiRNN(lstm_fw, lstm_bw, batch_ph, dtype=tf.float32)
     output = tf.divide(tf.add(output_fw, output_bw), 2)
 
@@ -70,7 +67,7 @@ with tf.name_scope('Multi_BiLSTM_Layers'):
 
 ##FC layers
 with tf.name_scope('Fully_connected_Layers'):
-    prediction = tf.contrib.layers.fully_connected(drop[:, -1], 1, activation_fn=tf.nn.sigmoid)
+    prediction = tf.contrib.layers.fully_connected(drop[:, -1], 6, activation_fn=tf.nn.sigmoid)
     tf.summary.histogram('Prediction', prediction)
 
 with tf.name_scope('Loss'):

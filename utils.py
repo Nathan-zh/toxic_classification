@@ -6,7 +6,7 @@ def dataset_input():
     #read training data
     df_train = pd.read_csv('train.csv')
     
-    df_y = df_train[['toxic']] #, 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate'
+    df_y = df_train[['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']]
     train_label = df_y.values
     
     df_x = df_train[['comment_text']]
@@ -16,7 +16,7 @@ def dataset_input():
     df_test = pd.read_csv('test.csv')
     df_test1 = pd.read_csv('test_labels.csv')
     
-    df_y1 = df_test1[['toxic']] #, 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate'
+    df_y1 = df_test1[['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']]
     idx0 = df_y1.index[df_y1['toxic']==0].values
     idx1 = df_y1.index[df_y1['toxic']==1].values
     idx = np.concatenate((idx0, idx1))
@@ -26,7 +26,7 @@ def dataset_input():
     test_data1 = df_x1.values.tolist()
     test_data =  [test_data1[i] for i in idx]
     
-    return (train_data, train_label, test_data, test_label)
+    return (train_data[:100], train_label[:100], test_data[:100], test_label[:100])
 
 
 def data_prepro(x_input):
