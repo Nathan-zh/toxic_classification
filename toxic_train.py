@@ -51,23 +51,26 @@ with tf.name_scope('Embedding Layer'):
 ##RNN layers
 lstm_size = 25
 lstm_layers = 2
-keep_prob_rnn = 0.8
+
 
 output = batch_ph
 for i in range(lstm_layers):
     with tf.name_scope('BiLSTM_Layer_{}'.format(i)):
         lstm_fw = LSTMCell(lstm_size)
-        cell_fw = tf.contrib.rnn.DropoutWrapper(lstm_fw, input_keep_prob=keep_prob_rnn)
+        #cell_fw = tf.contrib.rnn.DropoutWrapper(lstm_fw, output_keep_prob=keep_prob_ph)
         lstm_bw = LSTMCell(lstm_size)
-        cell_bw = tf.contrib.rnn.DropoutWrapper(lstm_bw, input_keep_prob=keep_prob_rnn)
+        #cell_bw = tf.contrib.rnn.DropoutWrapper(lstm_bw, output_keep_prob=keep_prob_ph)
 
-        (output_fw, output_bw), final_state = BiRNN(cell_fw, cell_bw, output, dtype=tf.float32)
+        (output_fw, output_bw), final_state = BiRNN(lstm_fw, lstm_bw, output, dtype=tf.float32)
         output = tf.concat((output_fw, output_bw), 2)
 
 tf.summary.histogram('RNN_output', output)
 
-##Dropout + attention?
-drop = tf.nn.dropout(output[:, -1], keep_prob_ph)
+##Attention + Dropout
+score = tf.matmul(output[:, -1], tf.transpose(output[:, 0:-1]))  #(1*output_size) * (output_size*99) = 1*99
+attention1 = tf.matmul(tf.diag(tf.nn.softmax(score)), output[:, 0:-1]) #(99*99) * (99*output_size) = 99*output_size
+attention = tf.concat(tf.reduce_sum(attention1, axis=1), output[:, -1], axis=1)
+drop = tf.nn.dropout(attention, keep_prob_ph)
 
 ##FC layers
 with tf.name_scope('Fully_connected_Layers'):
@@ -78,7 +81,7 @@ with tf.name_scope('Loss'):
     loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=output_ph, logits=prediction))
     tf.summary.scalar('loss', loss)
 
-optimizer = tf.train.AdamOptimizer(learning_rate=1e-4).minimize(loss)
+optimizer = tf.train.AdamOptimizer(learning_rate=1e-3).minimize(loss)
 #( ,6) == ( ,6)
 correct_pred = tf.reduce_all(tf.equal(tf.cast(tf.round(prediction), tf.int32), tf.cast(output_ph, tf.int32)), axis=1)
 
