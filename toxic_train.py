@@ -57,8 +57,8 @@ lstm_layers = 2
 output = batch_ph
 for i in range(lstm_layers):
     with tf.variable_scope('BiLSTM_Layer_{}'.format(i)):
-        lstm_fw = LSTMCell(lstm_size)
-        lstm_bw = LSTMCell(lstm_size)
+        lstm_fw = LSTMCell(lstm_size, initializer=tf.truncated_normal_initializer(-0.1, 0.1, seed=2))
+        lstm_bw = LSTMCell(lstm_size, initializer=tf.truncated_normal_initializer(-0.1, 0.1, seed=2))
         #cell_fw = tf.contrib.rnn.DropoutWrapper(lstm_fw, output_keep_prob=keep_prob_ph)
         #cell_bw = tf.contrib.rnn.DropoutWrapper(lstm_bw, output_keep_prob=keep_prob_ph)
 
