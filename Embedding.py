@@ -1,5 +1,6 @@
 import numpy as np
 
+
 class Embedding():
     def __init__(self, typeToLoad = "glove"):
     # This function is simply load the pre-trained embedding dataset to a python dictionary
