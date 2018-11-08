@@ -58,8 +58,8 @@ output = batch_ph
 for i in range(lstm_layers):
     with tf.variable_scope('BiLSTM_Layer_{}'.format(i)):
         lstm_fw = LSTMCell(lstm_size)
-        #cell_fw = tf.contrib.rnn.DropoutWrapper(lstm_fw, output_keep_prob=keep_prob_ph)
         lstm_bw = LSTMCell(lstm_size)
+        #cell_fw = tf.contrib.rnn.DropoutWrapper(lstm_fw, output_keep_prob=keep_prob_ph)
         #cell_bw = tf.contrib.rnn.DropoutWrapper(lstm_bw, output_keep_prob=keep_prob_ph)
 
         (output_fw, output_bw), final_state = BiRNN(lstm_fw, lstm_bw, output, dtype=tf.float32)
