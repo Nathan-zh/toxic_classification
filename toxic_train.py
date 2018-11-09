@@ -11,7 +11,7 @@ from Attention import Attention
 
 
 #Data preprocess
-seq_maxlen = 100
+seq_maxlen = 200
 
 (train_data, y_train_all, test_data, y_test) = dataset_input()
 x_train_list = data_prepro(train_data)
@@ -38,6 +38,7 @@ with tf.name_scope('Input'):
     batch_ph = tf.placeholder(tf.float32, [None, seq_maxlen, embed_size], name='batch_placeholder')
     output_ph = tf.placeholder(tf.float32, [None, 6], name='output_placeholder')
     keep_prob_ph = tf.placeholder(tf.float32, name='keep_prob_placeholder')
+    keep_prob_ph_rnn = tf.placeholder(tf.float32, name='keep_prob_placeholder_rnn')
 
 '''
 ##Embedding
@@ -51,25 +52,30 @@ with tf.name_scope('Embedding Layer'):
 
 ##RNN layers
 lstm_size = 32
-lstm_layers = 2
-
+lstm_layers = 3
 
 output = batch_ph
 for i in range(lstm_layers):
     with tf.variable_scope('BiLSTM_Layer_{}'.format(i)):
-        lstm_fw = LSTMCell(lstm_size, initializer=tf.truncated_normal_initializer(-0.1, 0.1, seed=2))
-        lstm_bw = LSTMCell(lstm_size, initializer=tf.truncated_normal_initializer(-0.1, 0.1, seed=2))
-        #cell_fw = tf.contrib.rnn.DropoutWrapper(lstm_fw, output_keep_prob=keep_prob_ph)
-        #cell_bw = tf.contrib.rnn.DropoutWrapper(lstm_bw, output_keep_prob=keep_prob_ph)
+        lstm_fw = LSTMCell(lstm_size) #, initializer=tf.truncated_normal_initializer(-0.1, 0.1, seed=2)
+        lstm_bw = LSTMCell(lstm_size)
+        cell_fw = tf.contrib.rnn.DropoutWrapper(lstm_fw, output_keep_prob=keep_prob_ph_rnn)
+        cell_bw = tf.contrib.rnn.DropoutWrapper(lstm_bw, output_keep_prob=keep_prob_ph_rnn)
 
-        (output_fw, output_bw), final_state = BiRNN(lstm_fw, lstm_bw, output, dtype=tf.float32)
+        (output_fw, output_bw), final_state = BiRNN(cell_fw, cell_bw, output, dtype=tf.float32)
         output = tf.concat((output_fw, output_bw), 2)
 
-tf.summary.histogram('RNN_output', output)
 
 ##Attention + Dropout
-attention = Attention(output)
-drop = tf.nn.dropout(attention, keep_prob_ph)
+with tf.variable_scope('BiLSTM_Layer_{}'.format(lstm_layers)):
+    lstm_fw = LSTMCell(lstm_size)
+    lstm_bw = LSTMCell(lstm_size)
+    (output_fw, output_bw), final_state = BiRNN(lstm_fw, lstm_bw, output, dtype=tf.float32)
+    output = tf.concat((output_fw, output_bw), 2)
+    attention = Attention(output)
+    drop = tf.nn.dropout(attention, keep_prob_ph)
+    tf.summary.histogram('RNN_output', output)
+
 
 ##FC layers
 with tf.name_scope('Fully_connected_Layers'):
@@ -77,10 +83,11 @@ with tf.name_scope('Fully_connected_Layers'):
     tf.summary.histogram('Prediction', prediction)
 
 with tf.name_scope('Loss'):
-    loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(labels=output_ph, logits=prediction))
+    logistic_loss = tf.nn.sigmoid_cross_entropy_with_logits(labels=output_ph, logits=prediction)
+    loss = tf.reduce_mean(logistic_loss)
     tf.summary.scalar('loss', loss)
 
-optimizer = tf.train.AdamOptimizer(learning_rate=1e-3).minimize(loss)
+optimizer = tf.train.AdamOptimizer(learning_rate=1e-2).minimize(loss)
 #( ,6) == ( ,6)
 correct_pred = tf.reduce_all(tf.equal(tf.cast(tf.round(prediction), tf.int32), tf.cast(output_ph, tf.int32)), axis=1)
 
@@ -95,8 +102,7 @@ saver = tf.train.Saver()
 
 
 #Training and Evaluation
-epoch = 10
-keep_prop = 0.5
+epoch = 5
 batch_size = 16
 batch_size_val = 64
 
@@ -109,13 +115,14 @@ with tf.Session() as sess:
 
         print('Epoch: {} start!'.format(m + 1))
         gen_batch_train = batch_generator(x_train, y_train, batch_size)
-        iteration = 50 #np.int(y_train.shape[0] / batch_size)
+        iteration = 50#np.int(y_train.shape[0] / batch_size)
         for n in range(iteration):
             (x_batch, y_batch) = next(gen_batch_train)
             loss_train,  _, summary = sess.run([loss, optimizer, merged],
-                                              feed_dict={batch_ph: x_batch,
-                                              output_ph: y_batch,
-                                              keep_prob_ph: keep_prop})
+                                               feed_dict={batch_ph: x_batch,
+                                                          output_ph: y_batch,
+                                                          keep_prob_ph: 0.5,
+                                                          keep_prob_ph_rnn: 0.7})
             train_writer.add_summary(summary, n+m*iteration)
             #Each 100 iterations, run a valadition
             if (n + 1) % 10 == 0:
@@ -125,9 +132,10 @@ with tf.Session() as sess:
                 for k in range(itr_val):
                     (x_batch, y_batch) = next(gen_batch_val)
                     accuracy_val, summary = sess.run([accuracy, merged],
-                                                    feed_dict={batch_ph: x_batch,
-                                                    output_ph: y_batch,
-                                                    keep_prob_ph: 1})
+                                                     feed_dict={batch_ph: x_batch,
+                                                                output_ph: y_batch,
+                                                                keep_prob_ph: 1,
+                                                                keep_prob_ph_rnn: 1})
                     val_acc += accuracy_val
                 print('Iteration: {}'.format(n+1),
                       'Train loss: {:.5f}'.format(loss_train),
@@ -155,10 +163,11 @@ with tf.Session() as sess:
     for i in range(iteration):
         (x_batch, y_batch) = next(gen_batch_test)
         test_accuracy = sess.run(accuracy,
-                                feed_dict={batch_ph: x_batch,
-                                output_ph: y_batch,
-                                keep_prob_ph: 1})
-        test_acc+= test_accuracy
+                                 feed_dict={batch_ph: x_batch,
+                                            output_ph: y_batch,
+                                            keep_prob_ph: 1,
+                                            keep_prob_ph_rnn: 1})
+        test_acc += test_accuracy
 
     print('Test Accuracy: {:.3f}'.format(test_acc/iteration))
 
