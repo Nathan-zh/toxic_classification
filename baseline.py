@@ -10,7 +10,6 @@ from keras import initializers, regularizers, constraints, optimizers, layers
 EMBEDDING_FILE = 'glove.twitter.27B.25d.txt'
 TRAIN_DATA_FILE = 'train.csv'
 TEST_DATA_FILE = 'test.csv'
-TEST_LABEL_FILE ='test_labels.csv'
 
 embed_size = 25 # how big is each word vector
 max_features = 20000 # how many unique words to use (i.e num rows in embedding vector)
@@ -18,13 +17,12 @@ maxlen = 100 # max number of words in a comment to use
 
 train = pd.read_csv(TRAIN_DATA_FILE)
 test = pd.read_csv(TEST_DATA_FILE)
-test_babel = pd.read_csv(TEST_LABEL_FILE)
 
 list_sentences_train = train["comment_text"].fillna("_na_").values
 list_classes = ["toxic", "severe_toxic", "obscene", "threat", "insult", "identity_hate"]
 y = train[list_classes].values
-y_test = test_babel[list_classes].values
 list_sentences_test = test["comment_text"].fillna("_na_").values
+
 
 tokenizer = Tokenizer(num_words=max_features)
 tokenizer.fit_on_texts(list(list_sentences_train))
@@ -52,9 +50,11 @@ for word, i in word_index.items():
 
 inp = Input(shape=(maxlen,))
 x = Embedding(max_features, embed_size, weights=[embedding_matrix])(inp)
-x = Bidirectional(LSTM(50, return_sequences=True, dropout=0.1, recurrent_dropout=0.1))(x)
+x = Bidirectional(LSTM(32, return_sequences=True, dropout=0.1, recurrent_dropout=0.1))(x)
+x = Bidirectional(LSTM(32, return_sequences=True, dropout=0.1, recurrent_dropout=0.1))(x)
+x = Bidirectional(LSTM(32, return_sequences=True, dropout=0.1, recurrent_dropout=0.1))(x)
 x = GlobalMaxPool1D()(x)
-x = Dense(50, activation="relu")(x)
+x = Dense(64, activation="relu")(x)
 x = Dropout(0.1)(x)
 x = Dense(6, activation="sigmoid")(x)
 model = Model(inputs=inp, outputs=x)
@@ -62,4 +62,9 @@ model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy']
 
 model.fit(X_t, y, batch_size=32, epochs=2, validation_split=0.1)
 
-y_test = model.predict([y_test], batch_size=1024, verbose=1)
+'''
+y_test = model.predict([X_te], batch_size=1024, verbose=1)
+sample_submission = pd.read_csv('sample_submission.csv')
+sample_submission[list_classes] = y_test
+sample_submission.to_csv('submission.csv', index=False)
+'''
