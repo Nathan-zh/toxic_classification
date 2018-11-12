@@ -25,7 +25,7 @@ def dataset_input():
     
     df_x1 = df_test[['comment_text']]
     test_data1 = df_x1.values.tolist()
-    test_data =  [test_data1[i] for i in idx]
+    test_data = [test_data1[i] for i in idx]
     
     return (train_data, train_label, test_data, test_label)
 
