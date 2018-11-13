@@ -101,7 +101,6 @@ print('*********Test accuracy is %.3f*********' % score[1])
 MODEL_PATH = './keras_model/model.h5'
 model.save(MODEL_PATH)
 print("Saved model to disk %s" % MODEL_PATH)
-plot_model(model, to_file='./figure/model.png')
 
 # Plot training & validation accuracy values
 plt.plot(history.history['acc'])
@@ -121,7 +120,7 @@ plt.xlabel('Epoch')
 plt.legend(['Train', 'Test'], loc='upper left')
 plt.show()
 
-
+plot_model(model, to_file='./figure/model.png')
 '''
 # serialize model to JSON
 model_json = model.to_json()
