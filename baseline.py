@@ -86,9 +86,11 @@ df_y1 = df_test_label[['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', '
 idx0 = df_y1.index[df_y1['toxic'] == 0].values
 idx1 = df_y1.index[df_y1['toxic'] == 1].values
 idx = np.concatenate((idx0, idx1))
-y_te = df_y1.values[idx]
+y_test = df_y1.values[idx]
 
-model.evaluate(x=X_te, y=y_te, batch_size=1024, verbose=1)
+X_test = [X_te[i] for i in idx]
+
+model.evaluate(x=X_test, y=y_test, batch_size=1024, verbose=1)
 
 
 
