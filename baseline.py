@@ -69,8 +69,8 @@ x = Bidirectional(GRU(64, return_sequences=True, return_state=False, dropout=0.2
                       recurrent_dropout=0.1))(x)
 #x = Bidirectional(LSTM(32, return_sequences=True, dropout=0.1, recurrent_dropout=0.1))(x)
 #x = Bidirectional(LSTM(32, return_sequences=True, dropout=0.1, recurrent_dropout=0.1))(x)
-x = GlobalMaxPool1D()(x)
-#x = Attention(maxlen)(x)
+#x = GlobalMaxPool1D()(x)
+x = Attention(maxlen)(x)
 x = Dense(64, activation="relu")(x)
 x = Dropout(0.1)(x)
 x = Dense(32, activation="relu")(x)
@@ -93,9 +93,9 @@ X_test = X_te[idx]
 
 score = model.evaluate(x=X_test, y=y_test, batch_size=1024, verbose=1)
 
-print(model.metrics_names)
-print(score)
-#print('Test accuracy is %.3f' % score[1])
+#print(model.metrics_names)
+#print(score)
+print('Test accuracy is %.3f' % score[1])
 
 
 
