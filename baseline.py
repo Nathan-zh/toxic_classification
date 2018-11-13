@@ -64,14 +64,15 @@ for word, i in word_index.items():
 
 inp = Input(shape=(maxlen,))
 x = Embedding(max_features, embed_size, weights=[embedding_matrix], trainable=False)(inp)
-x = Bidirectional(GRU(32, return_sequences=True, return_state=False, dropout=0.1,
-                       recurrent_dropout=0.1))(x)
+x = Bidirectional(GRU(64, return_sequences=True, return_state=False, dropout=0.2,
+                      recurrent_dropout=0.1))(x)
 #x = Bidirectional(LSTM(32, return_sequences=True, dropout=0.1, recurrent_dropout=0.1))(x)
 #x = Bidirectional(LSTM(32, return_sequences=True, dropout=0.1, recurrent_dropout=0.1))(x)
 x = GlobalMaxPool1D()(x)
 #x = Attention(maxlen)(x)
 x = Dense(64, activation="relu")(x)
 x = Dropout(0.1)(x)
+x = Dense(32, activation="relu")(x)
 x = Dense(6, activation="sigmoid")(x)
 model = Model(inputs=inp, outputs=x)
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
