@@ -1,5 +1,6 @@
 import sys, os, re, csv, codecs, numpy as np, pandas as pd
 
+from keras import backend as K
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
 from keras.layers import Dense, Input, LSTM, Embedding, Dropout, Activation, GRU
@@ -90,7 +91,11 @@ y_test = df_y1.values[idx]
 
 X_test = X_te[idx]
 
-model.evaluate(x=X_test, y=y_test, batch_size=1024, verbose=1)
+score = model.evaluate(x=X_test, y=y_test, batch_size=1024, verbose=1)
+
+print(model.metrics_names)
+print(score)
+#print('Test accuracy is %.3f' % score[1])
 
 
 
