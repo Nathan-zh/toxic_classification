@@ -93,7 +93,7 @@ y_test = df_y1.values[idx]
 
 X_test = X_te[idx]
 
-score = model.evaluate(x=X_test, y=y_test, batch_size=1024, verbose=1)
+score = model.evaluate(x=X_test, y=y_test, batch_size=512, verbose=1)
 
 #print(model.metrics_names)
 #print(score)
@@ -102,6 +102,10 @@ print('*********Test accuracy is %.3f*********' % score[1])
 MODEL_PATH = './keras_model/model.h5'
 model.save(MODEL_PATH)
 print("Saved model to disk %s" % MODEL_PATH)
+
+GRAPH_PATH = './figure/model.png'
+plot_model(model, to_file=GRAPH_PATH)
+print("Saved graph to disk %s" % GRAPH_PATH)
 
 # Plot training & validation accuracy values
 plt.plot(history.history['acc'])
@@ -121,7 +125,7 @@ plt.xlabel('Epoch')
 plt.legend(['Train', 'Test'], loc='upper left')
 plt.show()
 
-plot_model(model, to_file='./figure/model.png')
+
 '''
 # serialize model to JSON
 model_json = model.to_json()
