@@ -6,6 +6,7 @@ from keras.preprocessing.sequence import pad_sequences
 from keras.layers import Dense, Input, LSTM, Embedding, Dropout, Activation, GRU
 from keras.layers import Bidirectional, GlobalMaxPool1D
 from keras.models import Model
+from keras.utils import plot_model
 #from keras import initializers, regularizers, constraints, optimizers, layers
 from Attention_keras import Attention
 
@@ -78,7 +79,7 @@ x = Dense(6, activation="sigmoid")(x)
 model = Model(inputs=inp, outputs=x)
 model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-model.fit(X_t, y, batch_size=32, epochs=2, validation_split=0.1)
+history = model.fit(X_t, y, batch_size=32, epochs=2, validation_split=0.1)
 
 
 # test
@@ -95,8 +96,30 @@ score = model.evaluate(x=X_test, y=y_test, batch_size=1024, verbose=1)
 
 #print(model.metrics_names)
 #print(score)
-print('Test accuracy is %.3f' % score[1])
+print('*********Test accuracy is %.3f*********' % score[1])
 
+MODEL_PATH = './keras_model/model.h5'
+model.save(MODEL_PATH)
+print("Saved model to disk %s" % MODEL_PATH)
+plot_model(model, to_file='./figure/model.png')
+
+# Plot training & validation accuracy values
+plt.plot(history.history['acc'])
+plt.plot(history.history['val_acc'])
+plt.title('Model accuracy')
+plt.ylabel('Accuracy')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Test'], loc='upper left')
+plt.show()
+
+# Plot training & validation loss values
+plt.plot(history.history['loss'])
+plt.plot(history.history['val_loss'])
+plt.title('Model loss')
+plt.ylabel('Loss')
+plt.xlabel('Epoch')
+plt.legend(['Train', 'Test'], loc='upper left')
+plt.show()
 
 
 '''
