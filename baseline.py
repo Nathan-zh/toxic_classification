@@ -67,7 +67,7 @@ for word, i in word_index.items():
 
 inp = Input(shape=(maxlen,))
 x = Embedding(max_features, embed_size, weights=[embedding_matrix], trainable=False)(inp)
-x = Bidirectional(GRU(64, return_sequences=True, return_state=False, dropout=0.2,
+x = Bidirectional(GRU(64, return_sequences=True, return_state=False, dropout=0.5,
                       recurrent_dropout=0.1))(x)
 #x = Bidirectional(LSTM(32, return_sequences=True, dropout=0.1, recurrent_dropout=0.1))(x)
 #x = Bidirectional(LSTM(32, return_sequences=True, dropout=0.1, recurrent_dropout=0.1))(x)
@@ -99,32 +99,39 @@ score = model.evaluate(x=X_test, y=y_test, batch_size=512, verbose=1)
 #print(score)
 print('*********Test accuracy is %.3f*********' % score[1])
 
-MODEL_PATH = './keras_model/model.h5'
-model.save(MODEL_PATH)
+num = 2
+MODEL_PATH = './keras_model/model{}/'.format(num)
+
+model.save(MODEL_PATH+'model.h5')
 print("Saved model to disk %s" % MODEL_PATH)
 
-GRAPH_PATH = './figure/model.png'
-plot_model(model, to_file=GRAPH_PATH)
-print("Saved graph to disk %s" % GRAPH_PATH)
+plot_model(model, to_file=MODEL_PATH+'graph.png')
+print("Saved graph to disk %s" % MODEL_PATH)
 
+#print(history.history)
 # Plot training & validation accuracy values
+plt.figure(1)
 plt.plot(history.history['acc'])
 plt.plot(history.history['val_acc'])
 plt.title('Model accuracy')
 plt.ylabel('Accuracy')
 plt.xlabel('Epoch')
-plt.legend(['Train', 'Test'], loc='upper left')
-plt.show()
+plt.legend(['Train', 'Val'], loc='upper left')
+#plt.show()
+plt.savefig(MODEL_PATH+'accuracy.png')
+plt.close()
 
 # Plot training & validation loss values
+plt.figure(2)
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
 plt.title('Model loss')
 plt.ylabel('Loss')
 plt.xlabel('Epoch')
-plt.legend(['Train', 'Test'], loc='upper left')
-plt.show()
-
+plt.legend(['Train', 'Val'], loc='upper left')
+#plt.show()
+plt.savefig(MODEL_PATH+'loss.png')
+plt.close()
 
 '''
 # serialize model to JSON
