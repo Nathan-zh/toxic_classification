@@ -1,4 +1,5 @@
 import sys, os, re, csv, codecs, numpy as np, pandas as pd
+import matplotlib.pyplot as plt
 
 from keras import backend as K
 from keras.preprocessing.text import Tokenizer
