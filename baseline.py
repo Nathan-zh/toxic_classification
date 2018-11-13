@@ -79,6 +79,19 @@ model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy']
 
 model.fit(X_t, y, batch_size=32, epochs=2, validation_split=0.1)
 
+
+# test
+df_test_label = pd.read_csv('test_labels.csv')
+df_y1 = df_test_label[['toxic', 'severe_toxic', 'obscene', 'threat', 'insult', 'identity_hate']]
+idx0 = df_y1.index[df_y1['toxic'] == 0].values
+idx1 = df_y1.index[df_y1['toxic'] == 1].values
+idx = np.concatenate((idx0, idx1))
+y_te = df_y1.values[idx]
+
+model.evaluate(x=X_te, y=y_te, batch_size=1024, verbose=1)
+
+
+
 '''
 # serialize model to JSON
 model_json = model.to_json()
@@ -101,11 +114,4 @@ print("Loaded model from disk")
 loaded_model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
 score = loaded_model.evaluate(X, Y, verbose=0)
 print("%s: %.2f%%" % (loaded_model.metrics_names[1], score[1]*100))
-'''
-
-'''
-y_test = model.predict([X_te], batch_size=1024, verbose=1)
-sample_submission = pd.read_csv('sample_submission.csv')
-sample_submission[list_classes] = y_test
-sample_submission.to_csv('submission.csv', index=False)
 '''
