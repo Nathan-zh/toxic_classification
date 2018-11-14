@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
-from keras.layers import Dense, Input, LSTM, Embedding, Dropout, Activation, GRU, Conv1D
+from keras.layers import Dense, Input, LSTM, Embedding, Dropout, Activation, GRU, Conv1D, Average
 from keras.layers import Bidirectional, GlobalMaxPool1D, GlobalAveragePooling1D, concatenate, Flatten
 from keras.models import Model
 from keras.utils import plot_model
@@ -282,7 +282,26 @@ print('********* Model 5 test accuracy is %.4f *********' % model5_acc)
 
 
 # Ensemble evaluate
+def ensemble(num_model):
+
+    inp = Input(shape=(6*num_model,))
+    x = Dense(6, activation='sigmoid')(inp)
+    model = Model(inp, x, name='ensemble')
+
+    return model
+
+
+ensemble_model = ensemble(5)
+ensemble_model.load_weights('./keras_model/model_ensemble/model.h5')
+y_concat = np.concatenate([y_pred1, y_pred2, y_pred3, y_pred4, y_pred5], axis=1)
+y_pred = predict(ensemble_model, y_concat)
+correct_prediction = np.equal(np.int32(np.round(y_pred)), y_test)
+ensemble_accuracy = np.mean(correct_prediction)
+print('********* Ensemble model test accuracy is %.4f *********' % ensemble_accuracy)
+
+'''
 multi_pred = (y_pred1 + y_pred2 + y_pred3 + y_pred4 + y_pred5) / 5
 correct_pred = np.equal(np.int32(np.round(multi_pred)), y_test)
 ensemble_acc = np.mean(correct_pred)
 print('********* Ensemble model test accuracy is %.4f *********' % ensemble_acc)
+'''

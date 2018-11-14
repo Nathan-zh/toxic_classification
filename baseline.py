@@ -73,7 +73,7 @@ x = Bidirectional(GRU(64, return_sequences=True, return_state=False, dropout=0.5
                       recurrent_dropout=0.1))(x)
 #x = Bidirectional(LSTM(32, return_sequences=True, dropout=0.1, recurrent_dropout=0.1))(x)
 #x = Bidirectional(LSTM(32, return_sequences=True, dropout=0.1, recurrent_dropout=0.1))(x)
-x = GlobalAveragePooling1D()(x)
+#x = GlobalAveragePooling1D()(x)
 x = GlobalMaxPool1D()(x)
 #x = Attention(maxlen)(x)
 x = Dense(64, activation="relu")(x)
