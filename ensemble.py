@@ -7,6 +7,7 @@ from keras.layers import Dense, Input, LSTM, Embedding, Dropout, Activation, GRU
 from keras.layers import Bidirectional, GlobalMaxPool1D, GlobalAveragePooling1D
 from keras.models import Model
 from keras.utils import plot_model
+from keras.callbacks import TensorBoard
 from Attention_keras import Attention
 
 
