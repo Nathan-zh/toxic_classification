@@ -119,7 +119,7 @@ def Model1(maxlen, max_features, embed_size, embedding_matrix):
 
     return model
 
-'''
+
 def Model2(maxlen, max_features, embed_size, embedding_matrix):
 
     inp = Input(shape=(maxlen,))
@@ -186,7 +186,7 @@ def Model5(maxlen, max_features, embed_size, embedding_matrix):
     model = Model(inputs=inp, outputs=x)
 
     return model
-'''
+
 
 # Model1 training and weights saving / evaluation
 EMBEDDING_FILE = 'glove.6B.50d.txt'
@@ -197,12 +197,10 @@ X_t, y_t, X_test, y_test, embedding_matrix = data_input(EMBEDDING_FILE, embed_si
 model1 = Model1(maxlen, max_features, embed_size, embedding_matrix)
 model1.load_weights('./keras_model/model1/model.h5')
 #compile_and_train(model1, X_t, y_t, num_epochs=2, num_model=1)
-#score1 = evaluate(model1, X_test, y_test) #[loss, accuracy]
-#print('*********Test accuracy is %.4f*********' % score1[1])
+score1 = evaluate(model1, X_test, y_test) #[loss, accuracy]
+print('********* Model 1 test accuracy is %.4f *********' % score1[1])
 y_pred1 = predict(model1, X_test)
-print(y_pred1[:10, :])
 
-'''
 # Model2 training and weights saving / evaluation
 EMBEDDING_FILE = 'glove.twitter.27B.25d.txt'
 embed_size = 25
@@ -212,8 +210,8 @@ X_t, y_t, X_test, y_test, embedding_matrix = data_input(EMBEDDING_FILE, embed_si
 model2 = Model2(maxlen, max_features, embed_size, embedding_matrix)
 model2.load_weights('./keras_model/model2/model.h5')
 #compile_and_train(model2, X_t, y_t, num_epochs=2, num_model=2)
-#score2 = evaluate(model2, X_test, y_test) #[loss, accuracy]
-#print('*********Test accuracy is %.4f*********' % score2[1])
+score2 = evaluate(model2, X_test, y_test) #[loss, accuracy]
+print('********* Model 2 test accuracy is %.4f *********' % score2[1])
 y_pred2 = predict(model2, X_test)
 
 # Model3 training and weights saving / evaluation
@@ -225,11 +223,11 @@ X_t, y_t, X_test, y_test, embedding_matrix = data_input(EMBEDDING_FILE, embed_si
 model3 = Model3(maxlen, max_features, embed_size, embedding_matrix)
 model3.load_weights('./keras_model/model3/model.h5')
 #compile_and_train(model3, X_t, y_t, num_epochs=2, num_model=3)
-#score3 = evaluate(model3, X_test, y_test) #[loss, accuracy]
-#print('*********Test accuracy is %.4f*********' % score3[1])
+score3 = evaluate(model3, X_test, y_test) #[loss, accuracy]
+print('********* Model 3 test accuracy is %.4f *********' % score3[1])
 y_pred3 = predict(model3, X_test)
 
-
+'''
 # Model4 training and weights saving / evaluation
 EMBEDDING_FILE = 'glove.6B.50d.txt'
 embed_size = 50
@@ -240,7 +238,7 @@ model4 = Model4(maxlen, max_features, embed_size, embedding_matrix)
 #model4.load_weights('./keras_model/model4/model.h5')
 compile_and_train(model4, X_t, y_t, num_epochs=2, num_model=4)
 score4 = evaluate(model4, X_test, y_test) #[loss, accuracy]
-print('*********Test accuracy is %.4f*********' % score4[1])
+print('********* Model 4 test accuracy is %.4f *********' % score4[1])
 
 # Model5 training and weights saving / evaluation
 EMBEDDING_FILE = 'glove.6B.50d.txt'
@@ -252,5 +250,10 @@ model5 = Model5(maxlen, max_features, embed_size, embedding_matrix)
 #model5.load_weights('./keras_model/model5/model.h5')
 compile_and_train(model5, X_t, y_t, num_epochs=2, num_model=5)
 score5 = evaluate(model5, X_test, y_test) #[loss, accuracy]
-print('*********Test accuracy is %.4f*********' % score5[1])
+print('********* Model 5 test accuracy is %.4f *********' % score5[1])
 '''
+
+multi_pred = (y_pred1 + y_pred2 + y_pred3) / 3
+correct_pred = np.equal(np.int32(np.round(multi_pred)), y_test)
+ensemble_acc = np.mean(correct_pred)
+print('********* Ensemble model test accuracy is %.4f *********' % ensemble_acc)
