@@ -70,7 +70,7 @@ def data_input(EMBEDDING_FILE, embed_size, max_features, maxlen):
     return X_t, y_t, X_test, y_test, embedding_matrix
 
 
-def compile_and_train(model, num_epochs, num_model, X_t, y_t):
+def compile_and_train(model, X_t, y_t, num_epochs, num_model):
 
     MODEL_PATH = './keras_model/model{}/'.format(num_model)
 
@@ -86,6 +86,13 @@ def compile_and_train(model, num_epochs, num_model, X_t, y_t):
     print("Saved graph to disk %s" % MODEL_PATH)
 
     return
+
+def evaluate(model, X_test, y_test):
+
+    score = model.evaluate(x=X_test, y=y_test, batch_size=64, verbose=1)
+    print('*********Test accuracy is %.3f*********' % score[1])
+
+    return score
 
 
 def Model1(maxlen, max_features, embed_size, embedding_matrix):
@@ -105,14 +112,6 @@ def Model1(maxlen, max_features, embed_size, embedding_matrix):
     return model
 
 
-def evaluate(model, X_test, y_test):
-
-    score = model.evaluate(x=X_test, y=y_test, batch_size=64, verbose=1)
-    print('*********Test accuracy is %.3f*********' % score[1])
-
-    return score
-
-
 # Model1 training and weights saving
 EMBEDDING_FILE = 'glove.6B.50d.txt'
 embed_size = 50
@@ -120,6 +119,6 @@ max_features = 20000
 maxlen = 100
 X_t, y_t, X_test, y_test, embedding_matrix = data_input(EMBEDDING_FILE, embed_size, max_features, maxlen)
 model1 = Model1(maxlen, max_features, embed_size, embedding_matrix)
-compile_and_train(model1, num_epochs=2, num_model=1, X_t, y_t)
-score1 = evaluate(model1, X_test1, y_test1)
+compile_and_train(model1, X_t, y_t, num_epochs=2, num_model=1)
+score = evaluate(model1, X_test1, y_test1)
 
