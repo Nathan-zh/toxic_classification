@@ -119,7 +119,7 @@ max_features = 20000
 maxlen = 100
 X_t, y_t, X_test, y_test, embedding_matrix = data_input(EMBEDDING_FILE, embed_size, max_features, maxlen)
 model1 = Model1(maxlen, max_features, embed_size, embedding_matrix)
-model.load_weights('./keras_model/model1/model.h5')
+model1.load_weights('./keras_model/model1/model.h5')
 '''
 compile_and_train(model1, X_t, y_t, num_epochs=2, num_model=1)
 '''
