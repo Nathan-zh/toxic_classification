@@ -86,7 +86,7 @@ def compile_and_train(model, X_t, y_t, num_epochs, num_model):
     plot_model(model, to_file=MODEL_PATH + 'graph.png')
     print("Saved graph to disk %s" % MODEL_PATH)
 
-    return
+    return None
 
 def evaluate(model, X_test, y_test):
 
@@ -121,6 +121,6 @@ maxlen = 100
 X_t, y_t, X_test, y_test, embedding_matrix = data_input(EMBEDDING_FILE, embed_size, max_features, maxlen)
 model1 = Model1(maxlen, max_features, embed_size, embedding_matrix)
 compile_and_train(model1, X_t, y_t, num_epochs=2, num_model=1)
-score1 = evaluate(model1, X_test1, y_test1)
+score1 = evaluate(model1, X_test, y_test)
 print(score1)
 
