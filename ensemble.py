@@ -10,13 +10,10 @@ from keras.utils import plot_model
 from Attention_keras import Attention
 
 
-def data_input(EMBEDDING_FILE, embed_size):
+def data_input(EMBEDDING_FILE, embed_size, max_features, maxlen):
 
     TRAIN_DATA_FILE = 'train.csv'
     TEST_DATA_FILE = 'test.csv'
-
-    max_features = 20000 # how many unique words to use (i.e num rows in embedding vector)
-    maxlen = 100 # max number of words in a comment to use
 
     train = pd.read_csv(TRAIN_DATA_FILE)
     test = pd.read_csv(TEST_DATA_FILE)
@@ -73,9 +70,7 @@ def data_input(EMBEDDING_FILE, embed_size):
     return X_t, y_t, X_test, y_test, embedding_matrix
 
 
-def compile_and_train(model, num_epochs, num_model, EMBEDDING_FILE, embed_size):
-
-    X_t, y_t, X_test, y_test = data_input(EMBEDDING_FILE, embed_size)
+def compile_and_train(model, num_epochs, num_model, X_t, y_t):
 
     MODEL_PATH = './keras_model/model{}/'.format(num_model)
 
@@ -90,13 +85,13 @@ def compile_and_train(model, num_epochs, num_model, EMBEDDING_FILE, embed_size):
     plot_model(model, to_file=MODEL_PATH + 'graph.png')
     print("Saved graph to disk %s" % MODEL_PATH)
 
-    return X_test, y_test
+    return
 
 
-def Model1():
+def Model1(maxlen, max_features, embed_size, embedding_matrix):
 
-    inp = Input(shape=(100,))
-    x = Embedding(20000, 50, weights=[embedding_matrix], trainable=False)(inp)
+    inp = Input(shape=(maxlen,))
+    x = Embedding(max_features, embed_size, weights=[embedding_matrix], trainable=False)(inp)
     x = Bidirectional(GRU(64, return_sequences=True, return_state=False, dropout=0.5,
                           recurrent_dropout=0.1))(x)
     x = GlobalAveragePooling1D()(x)
@@ -118,8 +113,13 @@ def evaluate(model, X_test, y_test):
     return score
 
 
-model1 = Model1()
-X_test1, y_test1 = compile_and_train(model1, num_epochs=2, num_model=1,
-                                     EMBEDDING_FILE='glove.6B.50d.txt', embed_size=50)
+# Model1 training and weights saving
+EMBEDDING_FILE = 'glove.6B.50d.txt'
+embed_size = 50
+max_features = 20000
+maxlen = 100
+X_t, y_t, X_test, y_test, embedding_matrix = data_input(EMBEDDING_FILE, embed_size, max_features, maxlen)
+model1 = Model1(maxlen, max_features, embed_size, embedding_matrix)
+compile_and_train(model1, num_epochs=2, num_model=1, X_t, y_t)
 score1 = evaluate(model1, X_test1, y_test1)
 
