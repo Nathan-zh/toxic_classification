@@ -91,7 +91,6 @@ def compile_and_train(model, X_t, y_t, num_epochs, num_model):
 def evaluate(model, X_test, y_test):
 
     score = model.evaluate(x=X_test, y=y_test, batch_size=64, verbose=1)
-    print('*********Test accuracy is %.3f*********' % score[1])
 
     return score
 
@@ -120,7 +119,10 @@ max_features = 20000
 maxlen = 100
 X_t, y_t, X_test, y_test, embedding_matrix = data_input(EMBEDDING_FILE, embed_size, max_features, maxlen)
 model1 = Model1(maxlen, max_features, embed_size, embedding_matrix)
+model.load_weights('./keras_model/model1/model.h5')
+'''
 compile_and_train(model1, X_t, y_t, num_epochs=2, num_model=1)
-score1 = evaluate(model1, X_test, y_test)
-print(score1)
+'''
+score1 = evaluate(model1, X_test, y_test) #[loss, accuracy]
+print('*********Test accuracy is %.4f*********' % score1[1])
 
