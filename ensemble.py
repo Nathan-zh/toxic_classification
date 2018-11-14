@@ -101,7 +101,7 @@ def Model1(maxlen, max_features, embed_size, embedding_matrix):
     x = Embedding(max_features, embed_size, weights=[embedding_matrix], trainable=False)(inp)
     x = Bidirectional(GRU(64, return_sequences=True, return_state=False, dropout=0.5,
                           recurrent_dropout=0.1))(x)
-    x = GlobalAveragePooling1D()(x)
+    #x = GlobalAveragePooling1D()(x)
     x = GlobalMaxPool1D()(x)
     x = Dense(64, activation="relu")(x)
     x = Dropout(0.1)(x)
@@ -120,5 +120,6 @@ maxlen = 100
 X_t, y_t, X_test, y_test, embedding_matrix = data_input(EMBEDDING_FILE, embed_size, max_features, maxlen)
 model1 = Model1(maxlen, max_features, embed_size, embedding_matrix)
 compile_and_train(model1, X_t, y_t, num_epochs=2, num_model=1)
-score = evaluate(model1, X_test1, y_test1)
+score1 = evaluate(model1, X_test1, y_test1)
+print(score1)
 
