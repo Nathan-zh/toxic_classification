@@ -90,6 +90,7 @@ def compile_and_train(model, X_t, y_t, num_epochs, num_model):
 
 def evaluate(model, X_test, y_test):
 
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
     score = model.evaluate(x=X_test, y=y_test, batch_size=64, verbose=1)
 
     return score
