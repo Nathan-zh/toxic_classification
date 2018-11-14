@@ -113,7 +113,75 @@ def Model1(maxlen, max_features, embed_size, embedding_matrix):
     return model
 
 
-# Model1 training and weights saving
+def Model2(maxlen, max_features, embed_size, embedding_matrix):
+
+    inp = Input(shape=(maxlen,))
+    x = Embedding(max_features, embed_size, weights=[embedding_matrix], trainable=False)(inp)
+    x = Bidirectional(GRU(64, return_sequences=True, return_state=False, dropout=0.5,
+                          recurrent_dropout=0.1))(x)
+    #x = GlobalAveragePooling1D()(x)
+    x = GlobalMaxPool1D()(x)
+    x = Dense(64, activation="relu")(x)
+    x = Dropout(0.1)(x)
+    x = Dense(32, activation="relu")(x)
+    x = Dense(6, activation="sigmoid")(x)
+    model = Model(inputs=inp, outputs=x)
+
+    return model
+
+
+def Model3(maxlen, max_features, embed_size, embedding_matrix):
+
+    inp = Input(shape=(maxlen,))
+    x = Embedding(max_features, embed_size, weights=[embedding_matrix], trainable=False)(inp)
+    x = Bidirectional(GRU(64, return_sequences=True, return_state=False, dropout=0.5,
+                          recurrent_dropout=0.1))(x)
+    #x = GlobalAveragePooling1D()(x)
+    x = GlobalMaxPool1D()(x)
+    x = Dense(64, activation="relu")(x)
+    x = Dropout(0.1)(x)
+    x = Dense(32, activation="relu")(x)
+    x = Dense(6, activation="sigmoid")(x)
+    model = Model(inputs=inp, outputs=x)
+
+    return model
+
+'''
+def Model4(maxlen, max_features, embed_size, embedding_matrix):
+
+    inp = Input(shape=(maxlen,))
+    x = Embedding(max_features, embed_size, weights=[embedding_matrix], trainable=False)(inp)
+    x = Bidirectional(GRU(64, return_sequences=True, return_state=False, dropout=0.5,
+                          recurrent_dropout=0.1))(x)
+    #x = GlobalAveragePooling1D()(x)
+    x = GlobalMaxPool1D()(x)
+    x = Dense(64, activation="relu")(x)
+    x = Dropout(0.1)(x)
+    x = Dense(32, activation="relu")(x)
+    x = Dense(6, activation="sigmoid")(x)
+    model = Model(inputs=inp, outputs=x)
+
+    return model
+
+
+def Model5(maxlen, max_features, embed_size, embedding_matrix):
+
+    inp = Input(shape=(maxlen,))
+    x = Embedding(max_features, embed_size, weights=[embedding_matrix], trainable=False)(inp)
+    x = Bidirectional(GRU(64, return_sequences=True, return_state=False, dropout=0.5,
+                          recurrent_dropout=0.1))(x)
+    #x = GlobalAveragePooling1D()(x)
+    x = GlobalMaxPool1D()(x)
+    x = Dense(64, activation="relu")(x)
+    x = Dropout(0.1)(x)
+    x = Dense(32, activation="relu")(x)
+    x = Dense(6, activation="sigmoid")(x)
+    model = Model(inputs=inp, outputs=x)
+
+    return model
+'''
+
+# Model1 training and weights saving / evaluation
 EMBEDDING_FILE = 'glove.6B.50d.txt'
 embed_size = 50
 max_features = 20000
@@ -121,9 +189,55 @@ maxlen = 100
 X_t, y_t, X_test, y_test, embedding_matrix = data_input(EMBEDDING_FILE, embed_size, max_features, maxlen)
 model1 = Model1(maxlen, max_features, embed_size, embedding_matrix)
 model1.load_weights('./keras_model/model1/model.h5')
-'''
-compile_and_train(model1, X_t, y_t, num_epochs=2, num_model=1)
-'''
+#compile_and_train(model1, X_t, y_t, num_epochs=2, num_model=1)
 score1 = evaluate(model1, X_test, y_test) #[loss, accuracy]
 print('*********Test accuracy is %.4f*********' % score1[1])
 
+# Model2 training and weights saving / evaluation
+EMBEDDING_FILE = 'glove.twitter.27B.25d.txt'
+embed_size = 25
+max_features = 20000
+maxlen = 100
+X_t, y_t, X_test, y_test, embedding_matrix = data_input(EMBEDDING_FILE, embed_size, max_features, maxlen)
+model2 = Model2(maxlen, max_features, embed_size, embedding_matrix)
+#model2.load_weights('./keras_model/model2/model.h5')
+compile_and_train(model2, X_t, y_t, num_epochs=2, num_model=2)
+score2 = evaluate(model2, X_test, y_test) #[loss, accuracy]
+print('*********Test accuracy is %.4f*********' % score2[1])
+
+# Model3 training and weights saving / evaluation
+EMBEDDING_FILE = 'glove.6B.300d.txt'
+embed_size = 300
+max_features = 20000
+maxlen = 100
+X_t, y_t, X_test, y_test, embedding_matrix = data_input(EMBEDDING_FILE, embed_size, max_features, maxlen)
+model3 = Model3(maxlen, max_features, embed_size, embedding_matrix)
+#model3.load_weights('./keras_model/model3/model.h5')
+compile_and_train(model3, X_t, y_t, num_epochs=2, num_model=3)
+score3 = evaluate(model3, X_test, y_test) #[loss, accuracy]
+print('*********Test accuracy is %.4f*********' % score3[1])
+'''
+# Model4 training and weights saving / evaluation
+EMBEDDING_FILE = 'glove.6B.50d.txt'
+embed_size = 50
+max_features = 20000
+maxlen = 100
+X_t, y_t, X_test, y_test, embedding_matrix = data_input(EMBEDDING_FILE, embed_size, max_features, maxlen)
+model4 = Model4(maxlen, max_features, embed_size, embedding_matrix)
+#model4.load_weights('./keras_model/model4/model.h5')
+compile_and_train(model4, X_t, y_t, num_epochs=2, num_model=4)
+score4 = evaluate(model4, X_test, y_test) #[loss, accuracy]
+print('*********Test accuracy is %.4f*********' % score4[1])
+
+# Model5 training and weights saving / evaluation
+EMBEDDING_FILE = 'glove.6B.50d.txt'
+embed_size = 50
+max_features = 20000
+maxlen = 100
+X_t, y_t, X_test, y_test, embedding_matrix = data_input(EMBEDDING_FILE, embed_size, max_features, maxlen)
+model5 = Model5(maxlen, max_features, embed_size, embedding_matrix)
+#model5.load_weights('./keras_model/model5/model.h5')
+compile_and_train(model5, X_t, y_t, num_epochs=2, num_model=5)
+score5 = evaluate(model5, X_test, y_test) #[loss, accuracy]
+print('*********Test accuracy is %.4f*********' % score5[1])
+'''
